@@ -1,0 +1,15 @@
+for the installation of virtual env
+
+--> pip install virtualenv
+
+for making the virtualenv
+
+--> virtualenv test             where test is the name of the environment
+
+after making the virtualenv u have to enter into the virtualenv
+
+--> .\test\Scripts\             <shortcut - write test\S and thn press the TAB button>
+
+write activate to enter into the environment
+
+--> .\test\Scripts\activate
