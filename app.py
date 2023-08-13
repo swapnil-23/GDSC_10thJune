@@ -92,6 +92,24 @@ with visualizations:
                 close = stock_data['Close'])])
     st.plotly_chart(fig)
 
+## making the technical analysis dashboard for the user with having more than 100 indicators features
+import pandas_ta as ta
+with technical_analysis:
+    st.subheader("Technical Analysis Dashboard")
+
+    stock_data = pd.DataFrame()
+    stock_data = yf.download(Stock_symbol, start = start_date, end = end_date)
+    ind_list = stock_data.ta.indicators(as_list = True)
+    ##st.write(ind_list)
+
+    technical_indicator = st.selectbox("Technical Indicator", options = ind_list)
+    method = technical_indicator
+    indicator=pd.DataFrame(getattr(ta, method)(low=stock_data['Low'], high=stock_data['High'], close=stock_data['Close'], open=stock_data['Open'], volume=stock_data['Volume']))
+    indicator['Close'] = stock_data['Close']
+    figW_ind_new = px.line(indicator)
+    st.plotly_chart(figW_ind_new)
+    st.write(indicator)
+
 ## implementing the LSTM model for the given equity
 import tensorflow as tf
 import math
@@ -154,25 +172,3 @@ if st.button("Predict"):
     prediction = model.predict(X_train[-1].reshape(1, X_train.shape[1], X_train.shape[2]))
     prediction = scaler.inverse_transform(prediction)
     st.write("Prediction:", prediction)
-
-
-## making the technical analysis dashboard for the user with having more than 100 indicators features
-import pandas_ta as ta
-with technical_analysis:
-    st.subheader("Technical Analysis Dashboard")
-
-    stock_data = pd.DataFrame()
-    stock_data = yf.download(Stock_symbol, start = start_date, end = end_date)
-    ind_list = stock_data.ta.indicators(as_list = True)
-    ##st.write(ind_list)
-
-    technical_indicator = st.selectbox("Technical Indicator", options = ind_list)
-    method = technical_indicator
-    indicator=pd.DataFrame(getattr(ta, method)(low=stock_data['Low'], high=stock_data['High'], close=stock_data['Close'], open=stock_data['Open'], volume=stock_data['Volume']))
-    indicator['Close'] = stock_data['Close']
-    figW_ind_new = px.line(indicator)
-    st.plotly_chart(figW_ind_new)
-    st.write(indicator)
-
-
-## in order to run the streamlit just write -- streamlit run app.py in the terminal
