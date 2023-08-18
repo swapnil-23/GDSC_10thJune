@@ -16,7 +16,7 @@ import plotly.graph_objs as go
 ## *********************************************************** ##
 
 ## TITLE OF THE WEBSITE
-st.title("GDSC STOCK APP")
+st.title("STOCKET APP")
 
 ## making user-interactive for the user to choose its equity options
 ticker = st.sidebar.text_input('SYMBOL')
@@ -24,13 +24,13 @@ start_date = st.sidebar.date_input('Start Date')
 end_date = st.sidebar.date_input('End Date')
 
 
-## extracting the live data from the NSE website
+## extracting the live data from the YAHOO finance website
 Stock_symbol = ticker
 
 stock_data = yf.download(Stock_symbol, start = start_date, end = end_date)
 stock_data
 
-visualizations,  technical_analysis, model = st.tabs(["Portfolio Analysis","Technical Analysis Dashboard", "ML MODEL"])
+visualizations,  technical_analysis, model, news, education = st.tabs(["Portfolio Analysis","Technical Analysis Dashboard", "ML MODEL", "Financial News", "Learn Technalities"])
 
 ## making detailed analysis of the given portfolio
 with visualizations:
@@ -172,3 +172,28 @@ if st.button("Predict"):
     prediction = model.predict(X_train[-1].reshape(1, X_train.shape[1], X_train.shape[2]))
     prediction = scaler.inverse_transform(prediction)
     st.write("Prediction:", prediction)
+
+
+## creation of stock news tab
+from stocknews import StockNews
+with news:
+     st.header(f'News of {ticker}')
+     sn = StockNews(ticker, save_news=False)
+     df_news = sn.read_rss()
+
+     for i in range(10):
+          st.subheader(f'News {i+1}')
+          st.write(df_news['published'][i])
+          st.write(df_news['title'][i])
+          st.write(df_news['summary'][i])
+          title_sentiment = df_news['sentiment_title'][i]
+          st.write(f'Title Sentiment {title_sentiment}')
+          news_sentiment = df_news['sentiment summary'][i]
+          st.write(f'News Setiment {news_sentiment}')
+
+## creation of the education tab
+
+with education:
+     st.header('Financial Knowledge')
+
+     
