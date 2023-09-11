@@ -11,9 +11,9 @@ import streamlit as st
 import plotly.express as px
 import plotly.graph_objs as go
 
+from config import sign_up, fetch_users
 
-
-## *********************************************************** ##
+import pickle
 
 ## TITLE OF THE WEBSITE
 st.title("STOCKET APP")
@@ -27,14 +27,14 @@ end_date = st.sidebar.date_input('End Date')
 ## extracting the live data from the YAHOO finance website
 Stock_symbol = ticker
 
-stock_data = yf.download(Stock_symbol, start = start_date, end = end_date)
+stock_data = yf.download(Stock_symbol, start = start_date, end = end_date)  
 stock_data
 
 visualizations,  technical_analysis, model, news, education = st.tabs(["Portfolio Analysis","Technical Analysis Dashboard", "ML MODEL", "Financial News", "Learn Technalities"])
 
 ## making detailed analysis of the given portfolio
 with visualizations:
-    ## Making visulaizations for the proper analysis of the given market portfolio
+    # Making visulaizations for the proper analysis of the given market portfolio
 
     ## creating the line plot for the open price of the given symbol
     fig = px.line(stock_data, x = stock_data.index , y = stock_data['Open'], title='Open price of the given stock')
@@ -52,7 +52,7 @@ with visualizations:
     ## investigating on the moving avergae of our market portfolios
     window = 50
     ts = stock_data['Close']
-    
+        
     ## making the moving average
     ts_moving_avg = ts.rolling(window = window).mean()
 
@@ -110,6 +110,43 @@ with technical_analysis:
     st.plotly_chart(figW_ind_new)
     st.write(indicator)
 
+
+# creation of the education tab
+
+with education:
+    st.header(f'Financial Knowledge')
+    st.write('What is Opening Price:')
+    st.write("The opening price is the price of a stock at the beginning of a trading session. It is the first price at which a stock is traded when the market opens for the day.")
+
+    st.write('What is Closing Price:')
+    st.write("The closing price is the final price at which a stock is traded during a trading session. It represents the last transaction price before the market closes for the day.")
+
+    st.write('What is High Price:')
+    st.write("The high price is the highest price at which a stock was traded during a given trading session.")
+
+    st.write('What is Low Price:')
+    st.write("The low price is the lowest price at which a stock was traded during a given trading session.")
+
+    st.write('What is Moving Average:')
+    st.write("Moving Average (MA) is a widely used indicator in technical analysis that helps smooth out price data by creating a constantly updated average price. It can help identify trends and reversals.")
+
+    st.write('What is Exponential Moving Average:')
+    st.write("Exponential Moving Average (EMA) is a type of moving average that gives more weight to recent prices. It reacts more quickly to price changes compared to a simple moving average.")
+
+    st.write('What is Percentage Change (PCR):')
+    st.write("Percentage Change (PCR) is a measure of the price change expressed as a percentage. It is often used to measure the price movement of stocks or other financial instruments.")
+
+    st.write('What is Candlestick Chart:')
+    st.write("A candlestick chart is a graphical representation of price movement in financial markets. Each candlestick typically represents a single trading day and shows the opening, closing, high, and low prices.")
+
+    st.write('What is LSTM (Long Short-Term Memory):')
+    st.write("LSTM is a type of recurrent neural network (RNN) architecture used in the field of deep learning. It is particularly useful for time series data and sequential tasks due to its ability to capture long-term dependencies.")
+
+    st.write('What is Sentiment Analysis:')
+    st.write("Sentiment analysis involves using natural language processing and machine learning techniques to determine the sentiment or emotional tone of a piece of text. In the context of financial news, it can help gauge market sentiment.")
+
+    st.write('Feel free to explore more about these concepts and improve your understanding of the financial markets!')
+
 ## implementing the LSTM model for the given equity
 import tensorflow as tf
 import math
@@ -138,62 +175,58 @@ with model:
     test_size=len(df)-training_size
     train_data,test_data=df[0:training_size,:],df[training_size:len(df),:1]
 
-def create_dataset(dataset, time_step=1):
-	dataX, dataY = [], []
-	for i in range(len(dataset)-time_step-1):
-		a = dataset[i:(i+time_step), 0]   ###i=0, 0,1,2,3-----99   100 
-		dataX.append(a)
-		dataY.append(dataset[i + time_step, 0])
-	return np.array(dataX), np.array(dataY)
+    def create_dataset(dataset, time_step=1):
+        dataX, dataY = [], []
+        for i in range(len(dataset)-time_step-1):
+            a = dataset[i:(i+time_step), 0]   ###i=0, 0,1,2,3-----99   100 
+            dataX.append(a)
+            dataY.append(dataset[i + time_step, 0])
+        return np.array(dataX), np.array(dataY)
 
 
-time_step = 100
-X_train, y_train = create_dataset(train_data, time_step)
-X_test, ytest = create_dataset(test_data, time_step)
+    time_step = 100
+    X_train, y_train = create_dataset(train_data, time_step)
+    X_test, ytest = create_dataset(test_data, time_step)
 
-# reshape input to be [samples, time steps, features] which is required for LSTM
-X_train =X_train.reshape(X_train.shape[0],X_train.shape[1] , 1)
+    # reshape input to be [samples, time steps, features] which is required for LSTM
+    X_train =X_train.reshape(X_train.shape[0],X_train.shape[1] , 1)
 
 
-model=Sequential()
-model.add(LSTM(50,return_sequences=True,input_shape=(100,1)))
-model.add(LSTM(50,return_sequences=True))
-model.add(LSTM(50))
-model.add(Dense(1))
-model.compile(loss='mean_squared_error',optimizer='adam')
+    model=Sequential()
+    model.add(LSTM(50,return_sequences=True,input_shape=(100,1)))
+    model.add(LSTM(50,return_sequences=True))
+    model.add(LSTM(50))
+    model.add(Dense(1))
+    model.compile(loss='mean_squared_error',optimizer='adam')
 
-model.fit(X_train,y_train,validation_data=(X_test,ytest),epochs=30,batch_size=64,verbose=1)
+    model.fit(X_train,y_train,validation_data=(X_test,ytest),epochs=30,batch_size=64,verbose=1)
 
-st.title("LSTM Model in Streamlit")
+    st.title("LSTM Model in Streamlit")
 
-st.write("This app demonstrates how to implement an LSTM model in Streamlit.")
+    st.write("This app demonstrates how to implement an LSTM model in Streamlit.")
 
-if st.button("Predict"):
-    prediction = model.predict(X_train[-1].reshape(1, X_train.shape[1], X_train.shape[2]))
-    prediction = scaler.inverse_transform(prediction)
-    st.write("Prediction:", prediction)
+    if st.button("Predict"):
+        prediction = model.predict(X_train[-1].reshape(1, X_train.shape[1], X_train.shape[2]))
+        prediction = scaler.inverse_transform(prediction)
+        st.write("Prediction:", prediction)
 
 
 ## creation of stock news tab
 from stocknews import StockNews
 with news:
-     st.header(f'News of {ticker}')
-     sn = StockNews(ticker, save_news=False)
-     df_news = sn.read_rss()
+    st.header(f'News of {ticker}')
+    sn = StockNews(ticker, save_news=False)
+    df_news = sn.read_rss()
 
-     for i in range(10):
-          st.subheader(f'News {i+1}')
-          st.write(df_news['published'][i])
-          st.write(df_news['title'][i])
-          st.write(df_news['summary'][i])
-          title_sentiment = df_news['sentiment_title'][i]
-          st.write(f'Title Sentiment {title_sentiment}')
-          news_sentiment = df_news['sentiment summary'][i]
-          st.write(f'News Setiment {news_sentiment}')
+    for i in range(10):
+        st.subheader(f'News {i+1}')
+        st.write(df_news['published'][i])
+        st.write(df_news['title'][i])
+        st.write(df_news['summary'][i])
+        title_sentiment = df_news['sentiment_title'][i]
+        st.write(f'Title Sentiment {title_sentiment}')
+        news_sentiment = df_news['sentiment summary'][i]
+        st.write(f'News Setiment {news_sentiment}')
 
-## creation of the education tab
 
-with education:
-     st.header('Financial Knowledge')
 
-     
