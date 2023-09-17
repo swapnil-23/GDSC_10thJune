@@ -211,22 +211,28 @@ with model:
         st.write("Prediction:", prediction)
 
 
-## creation of stock news tab
+## Showing the financial news
 from stocknews import StockNews
-with news:
-    st.header(f'News of {ticker}')
+import streamlit as st
+
+with st.expander("Finance News"):
+    st.header('News of FINANCE')
     sn = StockNews(ticker, save_news=False)
     df_news = sn.read_rss()
 
-    for i in range(10):
+    # Ensure that there are at least 10 news items in the DataFrame
+    num_news_items = min(10, len(df_news))
+
+    for i in range(num_news_items):
         st.subheader(f'News {i+1}')
         st.write(df_news['published'][i])
         st.write(df_news['title'][i])
         st.write(df_news['summary'][i])
         title_sentiment = df_news['sentiment_title'][i]
         st.write(f'Title Sentiment {title_sentiment}')
-        news_sentiment = df_news['sentiment summary'][i]
-        st.write(f'News Setiment {news_sentiment}')
+        news_sentiment = df_news['sentiment_summary'][i]  # Corrected column name
+        st.write(f'News Sentiment {news_sentiment}')
+
 
 
 
